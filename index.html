@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2022.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="id"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Gunella Studio&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="max-w-3xl w-full bg-gray-800 p-6 rounded-xl shadow-lg border border-purple-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1 class="text-3xl font-bold text-center text-purple-400 mb-4"&gt;Gunella Studio&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="text-center text-gray-400 mb-6"&gt;Buat konten affiliate bisa dengan rebahan aja!&lt;/p&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Upload --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;label class="block mb-2 font-medium"&gt;Unggah Foto Produk Dulu&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="file" id="product-image" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="preview" class="mt-4 flex justify-center items-center h-40 bg-gray-700 rounded-lg overflow-hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span class="text-gray-500 text-sm"&gt;Pratinjau Foto Produk&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Generate button --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;button id="generate-button" class="w-full bg-purple-600 py-3 rounded-lg font-bold hover:bg-purple-700 transition-colors"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>Generate Konten</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Hasil --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="mt-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;h2 class="text-xl font-semibold text-purple-400 mb-4"&gt;Hasil Gambar&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="output" class="grid grid-cols-1 sm:grid-cols-2 gap-4"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const productInput = document.getElementById('product-image');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const preview = document.getElementById('preview');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const generateButton = document.getElementById('generate-button');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const output = document.getElementById('output');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>productInput.addEventListener('change', (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const file = e.target.files[0];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (file) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const reader = new FileReader();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>reader.onload = (ev) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>preview.innerHTML = `&lt;img src="${ev.target.result}" class="h-full object-contain"&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">        </span>reader.readAsDataURL(file);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>generateButton.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>output.innerHTML = '';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>for (let i = 0; i &lt; 3; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const div = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>div.className = "h-40 bg-gray-700 rounded-lg flex items-center justify-center";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>div.innerHTML = `&lt;span class="text-gray-400"&gt;[Generated ${i+1}]&lt;/span&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>output.appendChild(div);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
