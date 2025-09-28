@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gunella Studio — Affiliate Content Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+    .card{background:#1f2937;border:1px solid #374151;box-shadow:0 4px 6px -1px rgba(168,85,247,.2),0 2px 4px -1px rgba(168,85,247,.1)}
+    .loader{border-top-color:#a855f7;animation:spin 1.2s linear infinite;border-width:4px;border-style:solid;border-radius:9999px;width:48px;height:48px;border-bottom-color:transparent;border-left-color:transparent;border-right-color:#4b5563}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .progress-container{position:relative;height:8px;background:#374151;border-radius:9999px;overflow:hidden;margin-top:.75rem}
+    .progress-bar{height:100%;width:0%;background:#a855f7;transition:width .3s ease}
+    .image-container{position:relative;overflow:hidden}
+    .text-toggle-on-card{position:absolute;top:8px;left:8px;z-index:10}
+    .toggle-label{position:relative;display:inline-block;width:50px;height:28px}
+    .toggle-label input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#4b5563;border-radius:28px;transition:.3s}
+    .toggle-slider:before{position:absolute;content:"T";height:20px;width:20px;left:4px;bottom:4px;background:#fff;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#4b5563;font-weight:700;transition:.3s}
+    .toggle-label input:checked + .toggle-slider{background:#a855f7}
+    .toggle-label input:checked + .toggle-slider:before{transform:translateX(22px)}
+    .delete-btn{position:absolute;top:6px;right:6px;background:rgba(239,68,68,.85);color:#fff;border-radius:9999px;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;z-index:1000}
+    .modal.open{display:flex}
+  </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-gray-100">
+
+  <main class="max-w-6xl mx-auto p-4 sm:p-6">
+    <div class="bg-gray-800 border-2 border-purple-500 rounded-2xl shadow-lg shadow-purple-500/30 p-6">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-2">AFFILIATE Content Generator</h1>
+      <p class="text-center text-gray-400 mb-6">Buat konten affiliate bisa dengan rebahan aja!</p>
+
+      <!-- Mode badge -->
+      <div id="modeBadge" class="mb-4">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+          DEMO mode — gambar dummy (tanpa API)
+        </span>
+      </div>
+
+      <div id="message-container"></div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Left: Inputs -->
+        <section class="flex flex-col gap-4">
+          <!-- Product -->
+          <div class="card p-4 rounded-xl">
+            <p class="text-gray-300 font-medium mb-2">1. Unggah Foto</p>
+            <label class="block text-gray-300 font-medium mb-2" for="product-image">Unggah Foto Produk</label>
+            <div id="product-preview-wrap" class="relative">
+              <input id="product-image" type="file" accept="image/*"
+                     class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer">
+              <div id="product-preview" class="mt-3 h-48 rounded-lg bg-gray-700 border border-purple-500/40 flex items-center justify-center overflow-hidden">
+                <span class="text-gray-500 text-sm">Pratinjau Foto Produk</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product desc + text/logo toggle -->
+          <div id="product-info-section" class="card p-4 rounded-xl hidden">
+            <p class="text-gray-300 font-medium mb-2">Jelaskan Produk & Konsep Foto</p>
+            <textarea id="product-info-input" rows="4" placeholder="Contoh: Biskuit cokelat renyah. Konsep foto di kafe outdoor sore hari, suasana santai."
+                      class="w-full p-3 border border-gray-600 bg-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+
+            <div class="mt-4 flex items-center gap-3">
+              <label for="text-toggle" class="text-gray-300 font-medium">Tambahkan Tulisan pada Hasil</label>
+              <label class="toggle-label">
+                <input id="text-toggle" type="checkbox">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div id="logo-upload-section" class="hidden mt-4">
+              <label class="block text-gray-300 font-medium mb-2" for="logo-image">Unggah Logo (opsional)</label>
+              <input id="logo-image" type="file" accept="image/*"
+                     class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer">
+              <div id="logo-preview" class="mt-3 h-16 rounded-lg bg-gray-700 border border-purple-500/40 flex items-center justify-center overflow-hidden">
+                <span class="text-gray-500 text-sm">Pratinjau Logo</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Model -->
+          <div class="card p-4 rounded-xl">
+            <label class="block text-gray-300 font-medium mb-2" for="model-image">Unggah Foto Model (opsional)</label>
+            <input id="model-image" type="file" accept="image/*"
+                   class="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer">
+            <div id="model-preview" class="mt-3 h-48 rounded-lg bg-gray-700 border border-purple-500/40 flex items-center justify-center overflow-hidden">
+              <span class="text-gray-500 text-sm">Pratinjau Foto Model</span>
+            </div>
+
+            <div id="model-gender-section" class="mt-4">
+              <label class="block text-gray-300 font-medium mb-2">Jenis Kelamin Model AI</label>
+              <select id="model-gender-select"
+                      class="w-full p-3 border border-gray-600 bg-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <option value="auto" selected>AUTO</option>
+                <option value="male">PRIA</option>
+                <option value="female">WANITA</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Model style + hijab -->
+          <div id="description-section" class="card p-4 rounded-xl hidden">
+            <p class="text-gray-300 font-medium mb-2">Jelaskan Pakaian & Aksesoris Model (opsional)</p>
+            <textarea id="model-style-input" rows="4" placeholder="Contoh: kemeja flanel, jeans biru, sepatu kets putih."
+                      class="w-full p-3 border border-gray-600 bg-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+            <label class="flex items-center gap-2 mt-3">
+              <input id="hijab-toggle" type="checkbox" class="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500">
+              <span class="text-sm text-gray-300">Model mengenakan hijab</span>
+            </label>
+          </div>
+
+          <!-- Ratio + Generate -->
+          <div class="card p-4 rounded-xl">
+            <p class="text-gray-300 font-medium mb-2">3. Pilih Rasio</p>
+            <select id="ratio-select"
+                    class="w-full p-3 border border-gray-600 bg-gray-700 rounded-lg text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500">
+              <option value="portrait" selected>PORTRAIT (9:16)</option>
+              <option value="square">SQUARE (1:1)</option>
+              <option value="landscape">LANDSCAPE (16:9)</option>
+            </select>
+          </div>
+
+          <button id="generate-button"
+                  class="w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-full hover:bg-purple-700 transition disabled:bg-purple-400">
+            Generate Konten
+          </button>
+        </section>
+
+        <!-- Right: Outputs -->
+        <section class="flex flex-col gap-8">
+          <div>
+            <h2 class="text-xl font-semibold mb-3 text-purple-400">Foto B-Roll</h2>
+            <div id="broll-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold mb-3 text-purple-400">Foto UGC</h2>
+            <div id="ugc-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold mb-3 text-purple-400">Foto Komersial</h2>
+            <div id="commercial-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="mt-8 text-center text-gray-500">
+        <p class="text-xs">© Gunella Studio | Demo UI — v0.1</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="image-modal" class="modal">
+    <img id="modal-image" src="" class="max-w-[92vw] max-h-[92vh] rounded-xl shadow-xl" alt="Preview">
+  </div>
+
+  <script>
+    // ===== CONFIG =====
+    const USE_DEMO_MODE = true; // <- Kalau nanti pakai backend Gemini, set ke false dan isi callApi() ke '/api/generate'
+
+    // ===== ELEMENTS =====
+    const el = (id) => document.getElementById(id);
+    const productInput = el('product-image');
+    const productPreview = el('product-preview');
+    const productInfoSection = el('product-info-section');
+    const productInfoInput = el('product-info-input');
+    const textToggle = el('text-toggle');
+    const logoUploadSection = el('logo-upload-section');
+    const logoInput = el('logo-image');
+    const logoPreview = el('logo-preview');
+    const modelInput = el('model-image');
+    const modelPreview = el('model-preview');
+    const modelGenderSection = el('model-gender-section');
+    const modelGenderSelect = el('model-gender-select');
+    const descriptionSection = el('description-section');
+    const modelStyleInput = el('model-style-input');
+    const hijabToggle = el('hijab-toggle');
+    const ratioSelect = el('ratio-select');
+    const brollContainer = el('broll-container');
+    const ugcContainer = el('ugc-container');
+    const commercialContainer = el('commercial-container');
+    const generateButton = el('generate-button');
+    const messageContainer = el('message-container');
+    const imageModal = el('image-modal');
+    const modalImage = el('modal-image');
+    const modeBadge = el('modeBadge');
+
+    if (!USE_DEMO_MODE) {
+      modeBadge.innerHTML = '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">LIVE mode — pakai API Gemini (via backend)</span>';
+    }
+
+    // ===== HELPERS =====
+    function showMessage(text, type='ok'){
+      const div = document.createElement('div');
+      div.className = `p-3 rounded-lg mb-4 text-center ${type==='error'?'bg-red-900/60 text-red-300 border border-red-500/50':'bg-emerald-900/50 text-emerald-300 border border-emerald-500/40'}`;
+      div.textContent = text;
+      messageContainer.innerHTML = '';
+      messageContainer.appendChild(div);
+      setTimeout(()=>div.remove(), 4000);
+    }
+
+    function previewImage(input, previewBox, label){
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewBox.innerHTML = `<img src="${e.target.result}" alt="Pratinjau ${label}" class="w-full h-full object-cover">`;
+        addDeleteButton(previewBox, input, label);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function addDeleteButton(box, input, label){
+      box.querySelector('.delete-btn')?.remove();
+      const b = document.createElement('button');
+      b.className = 'delete-btn';
+      b.setAttribute('aria-label','Hapus');
+      b.innerHTML = '×';
+      b.onclick = (ev)=>{ ev.stopPropagation(); input.value=''; box.innerHTML = `<span class="text-gray-500 text-sm">Pratinjau ${label}</span>`; };
+      box.appendChild(b);
+    }
+
+    function createPlaceholder(container){
+      const card = document.createElement('div');
+      card.className = 'w-full rounded-lg overflow-hidden border border-purple-500/40 card min-h-[200px] flex flex-col items-center justify-center p-4';
+      card.innerHTML = `
+        <div class="loader mb-2"></div>
+        <span class="text-gray-400 text-sm">Memproses...</span>
+        <div class="progress-container w-full"><div class="progress-bar"></div></div>
+      `;
+      container.appendChild(card);
+      return card;
+    }
+
+    function fakeProgress(bar){
+      let p = 0; const id = setInterval(()=>{ p = Math.min(98, p+2); bar.style.width = p+'%'; }, 120);
+      return ()=>clearInterval(id);
+    }
+
+    function cropToRatio(dataUrl, rw, rh){
+      // DEMO: biarkan apa adanya; di LIVE pakai canvas crop seperti versi panjangmu
+      return Promise.resolve(dataUrl);
+    }
+
+    function viewImage(url){ modalImage.src = url; imageModal.classList.add('open'); }
+    imageModal.addEventListener('click', (e)=>{ if (e.target===imageModal) imageModal.classList.remove('open'); });
+
+    // ===== EVENTS =====
+    textToggle.addEventListener('change', ()=> logoUploadSection.classList.toggle('hidden', !textToggle.checked));
+    productInput.addEventListener('change', ()=>{ previewImage(productInput, productPreview, 'Foto Produk'); productInfoSection.classList.toggle('hidden', productInput.files.length===0); });
+    logoInput.addEventListener('change', ()=> previewImage(logoInput, logoPreview, 'Logo'));
+    modelInput.addEventListener('change', ()=>{
+      previewImage(modelInput, modelPreview, 'Foto Model');
+      descriptionSection.classList.toggle('hidden', modelInput.files.length===0);
+      modelGenderSection.classList.toggle('hidden', modelInput.files.length>0);
+    });
+
+    // ===== DEMO IMAGE MAKER (tanpa API) =====
+    function makeDemoImage(text='Gunella Demo', color='#a855f7'){
+      const canvas = document.createElement('canvas');
+      canvas.width = 900; canvas.height = 1600;
+      const ctx = canvas.getContext('2d');
+
+      const grad = ctx.createLinearGradient(0,0,900,1600);
+      grad.addColorStop(0,'#0b1020'); grad.addColorStop(1,color);
+      ctx.fillStyle = grad; ctx.fillRect(0,0,900,1600);
+
+      ctx.fillStyle = 'rgba(255,255,255,.08)';
+      for(let i=0;i<80;i++){
+        ctx.beginPath();
+        ctx.arc(Math.random()*900, Math.random()*1600, Math.random()*120, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 48px Inter, sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(text, 450, 1500);
+      return canvas.toDataURL('image/png');
+    }
+
+    // ===== LIVE CALL (isi kalau sudah punya backend) =====
+    async function callApi(payload){
+      // NOTE:
+      // - Kalau nanti pakai backend (Vercel), ganti ini:
+      // const res = await fetch('/api/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      // if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e?.error||('API '+res.status)); }
+      // const j = await res.json();
+      // const base64 = j?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData)?.inlineData?.data;
+      // if(!base64) throw new Error('Tidak ada data.');
+      // return `data:image/png;base64,${base64}`;
+      throw new Error('LIVE mode belum dihubungkan ke backend.');
+    }
+
+    // ===== GENERATE =====
+    generateButton.addEventListener('click', async ()=>{
+      const productFile = productInput.files[0];
+      if(!productFile){ showMessage('Mohon unggah foto produk terlebih dahulu.', 'error'); return; }
+      if (textToggle.checked && !productInfoInput.value.trim()){
+        showMessage('Isi deskripsi produk jika ingin menambahkan tulisan.', 'error'); return;
+      }
+
+      generateButton.disabled = true; generateButton.textContent = 'Sedang Membuat...';
+      [brollContainer, ugcContainer, commercialContainer].forEach(c=>c.innerHTML='');
+
+      const groups = [
+        { id:'broll', container:brollContainer, prompts:[
+          'B-Roll. Close-up tekstur produk dengan pencahayaan studio tajam.',
+          'B-Roll. Flat lay top-down minimalis, produk sebagai fokus.',
+          'B-Roll. Adegan dinamis: remah/percikan di sekitar produk.',
+          'B-Roll. Produk di permukaan relevan, bokeh latar.'
+        ]},
+        { id:'ugc', container:ugcContainer, prompts:[
+          'UGC. Model Indonesia memakai produk secara kasual.',
+          'UGC. Model antusias, candid feel.',
+          'UGC. Panning dari wajah ke produk.',
+          'UGC. Sudut berbeda menonjolkan penggunaan produk.'
+        ]},
+        { id:'commercial', container:commercialContainer, prompts:[
+          'Komersial. Flat lay kreatif dgn properti relevan.',
+          'Komersial. Fokus tekstur & lighting sinematik.',
+          'Komersial. Produk melayang dengan partikel.',
+          'Komersial. Estetika futuristik dgn neon.'
+        ]}
+      ];
+
+      const ratioMap = { portrait:[9,16], square:[1,1], landscape:[16,9] };
+      const [rw, rh] = ratioMap[ratioSelect.value];
+
+      try{
+        for (const g of groups){
+          for (let i=0;i<g.prompts.length;i++){
+            const card = createPlaceholder(g.container);
+            const bar = card.querySelector('.progress-bar');
+            const stop = fakeProgress(bar);
+
+            try{
+              let imgUrl;
+              if (USE_DEMO_MODE){
+                imgUrl = makeDemoImage(`${g.id.toUpperCase()} • #${i+1}`);
+              }else{
+                const payload = { contents:[{ parts:[{text:g.prompts[i]}] }], generationConfig:{ responseModalities:['IMAGE'] } };
+                imgUrl = await callApi(payload);
+              }
+              const cropped = await cropToRatio(imgUrl, rw, rh);
+
+              // render final card
+              card.innerHTML = '';
+              card.classList.remove('items-center','justify-center','p-4','min-h-[200px]');
+              const box = document.createElement('div');
+              box.className = 'image-container w-full h-full relative';
+              box.innerHTML = `<img src="${cropped}" alt="Generated ${g.id}" class="w-full h-full object-cover">`;
+
+              const btns = document.createElement('div');
+              btns.className = 'absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 z-10';
+              btns.innerHTML = `
+                <button aria-label="Unduh" class="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </button>
+                <button aria-label="Lihat" class="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              `;
+              box.appendChild(btns);
+
+              // events
+              const [dlBtn, viewBtn] = btns.querySelectorAll('button');
+              dlBtn.onclick = async ()=>{
+                const a = document.createElement('a');
+                a.href = cropped; a.download = `${g.id}-${i+1}.png`; document.body.appendChild(a); a.click(); a.remove();
+              };
+              viewBtn.onclick = ()=> viewImage(cropped);
+
+              card.appendChild(box);
+            } catch(err){
+              card.innerHTML = `<div class="p-4 text-center text-red-300">Gagal membuat gambar.<br><span class="text-xs opacity-70">${err.message}</span></div>`;
+            } finally {
+              stop();
+            }
+          }
+        }
+      } finally {
+        generateButton.disabled = false; generateButton.textContent = 'Generate Konten';
+      }
+    });
+  </script>
+</body>
+</html>
